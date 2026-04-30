@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MedicAI</title>
+
+    <style>
+        * {
+    box-sizing: border-box;
+}
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f4f7fb, #e9f1ff);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #1e2a38;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 14px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+            border-radius: 10px;
+            border: 1px solid #d6e0f0;
+            outline: none;
+            resize: none;
+            transition: 0.2s;
+        }
+
+        textarea:focus {
+            border-color: #2c7be5;
+            box-shadow: 0 0 8px rgba(44,123,229,0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            cursor: pointer;
+            background: #2c7be5;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #1f5fd1;
+        }
+
+        button:disabled {
+            background: #8fb4f2;
+            cursor: not-allowed;
+        }
+
+        .title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        #result {
+            white-space: pre-line;
+            line-height: 1.6;
+            color: #2b2b2b;
+            font-size: 14.5px;
+        }
+
+        /* 🔥 Loading animation */
+        .loader {
+            display: none;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #2c7be5;
+        }
+
+        .dot {
+            animation: blink 1.4s infinite both;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0% { opacity: 0.2; }
+            20% { opacity: 1; }
+            100% { opacity: 0.2; }
+        }
+
+        /* mobile */
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🩺 MedicAI</h1>
+
+    <div class="card">
+        <form id="medForm">
+            <textarea name="text" rows="5" placeholder="Describe your symptoms..."></textarea>
+
+            <button type="submit" id="btn">Analyze Symptoms</button>
+
+            <div class="loader" id="loader">
+                Analyzing<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="title">Medical Analysis</div>
+        <div id="result">Waiting for input...</div>
+    </div>
+
+</div>
+
+<script>
+const form = document.getElementById("medForm");
+const resultBox = document.getElementById("result");
+const btn = document.getElementById("btn");
+const loader = document.getElementById("loader");
+
+let loading = false;
+
+form.onsubmit = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+
+    loading = true;
+    btn.disabled = true;
+    loader.style.display = "block";
+    resultBox.innerText = "Thinking...";
+
+    try {
+        const res = await fetch("/process", {
+            method: "POST",
+            body: new FormData(form)
+        });
+
+        const data = await res.json();
+        resultBox.innerText = data.result;
+
+    } catch (err) {
+        resultBox.innerText = "Server error. Try again.";
+    }
+
+    loading = false;
+    btn.disabled = false;
+    loader.style.display = "none";
+};
+</script>
+
+</body>
+</html>
